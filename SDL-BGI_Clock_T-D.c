@@ -96,11 +96,6 @@
 // To add or remove the numerals from the clock face.
 #define CLOCK_NUMERALS 0 // 1 == ON | 0 == OFF
 
-void Busy_Wait(int cycle);  // Not used
-int nano_sleep(int xsec, int xnsec);  // Not used
-int nano_sleep_dec(double xdec_sec);  // Not used
-
-
 // Sepeperate implimentations of the x. y rendering functions.
 // I have left both sets so you can see what I have done to
 // calculate 3600 second hand tics per minute :)
@@ -776,73 +771,3 @@ double GetTimeDilation(double v)  //double velocity, double distance)
 
 
 //==============================================================================
-
-// seconds and nanoseconds
-int nano_sleep(int xsec, int xnsec)
-    {
-    //usec - 0 to 999999999
-    //struct timespec remaining, request = { 5, 100 };
-    struct timespec remaining, request = { xsec, xnsec };
-
-    printf("Taking a nap...\n");
-    int response = nanosleep(&request, &remaining);
-
-    if (response == 0)    // 0True|-1 False
-        {
-        printf("Nap was Successful .\n");
-        }
-    else
-        {
-        printf("Nap was Interrupted.\n");
-        }
-    return response;
-    }
-
-// This takes a sleep time as double seconds.nanoseconds
-int nano_sleep_dec(double xdec_sec)
-    {
-    double xsec, xnsec;
-
-    // 10 to 1000 CPU cycles
-    if(xdec_sec < 0.0)
-        {
-        return -1;
-        }
-    xnsec = (modf (xdec_sec, &xsec) * 1000000000);
-
-    //printf("%f|%f\n", xsec, xnsec);
-
-    //usec - 0 to 999999999
-    //struct timespec remaining, request = { 5, 100 };
-    struct timespec remaining, request = { (int)xsec, (int)xnsec };
-
-    //printf("Taking a nap...\n");
-    int response = nanosleep(&request, &remaining);
-
-    if (response == 0)    // 0True|-1 False
-        {
-        ;//printf("Nap was Successful .\n");
-        }
-    else
-        {
-        ;//printf("Nap was Interrupted.\n");
-        }
-    return response;
-    }
-
-
-// Alpha
-void Busy_Wait(int cycle)
-    {
-    int q, w;
-
-    for (q = 0; q < cycle; q++)
-        {
-        for (w = 0; w < cycle; w++)
-            {
-            ;
-            }
-        }
-    }
-//==============================================================================
-
