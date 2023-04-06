@@ -31,5 +31,3 @@ For setting up the C compiler and IDE, SDL-Bgi library <graphics.h> as well as S
 LICENCE MIT
 2023
 Axle
-
-P.S. I meant to remove the unused nano sleep functions. They are alpha and untested.
