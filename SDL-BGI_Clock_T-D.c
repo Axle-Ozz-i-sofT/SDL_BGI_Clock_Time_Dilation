@@ -12,60 +12,61 @@
 //
 // Author:      Axle
 // Created:     12/03/2023
-// Updated:     27/03/2023
-// Version:     0.0.2.0
+// Updated:     30/05/2023
+// Version:     0.0.2.1
 // Copyright:   (c) Axle 2022
 // Licence:     MIT
 //------------------------------------------------------------------------------
 // NOTES:
 // This is a representation of time dilation using a quartz like action clock.
 // The radius is 2862807095.5421653553357478091848m or
-// (~2862807km |~distance from Sun to Uranus). The circumference of the clock is
+// (~2862807km |~4.1 times the radius of the Sun, or half the orbital radius
+// of Mercury). The circumference of the clock is
 // 17987547480m so when divided by the number of seconds (60) for each rotation
-// the outer tip of the second hand is traveling at 299792458m/s or the speed
+// the outer tip of the second hand is travelling at 299792458m/s or the speed
 // of light. The radius is divided evenly into 500 points of radius each with
-// it's own circumference. Time dilation is calculated agianst the velocity
-// of the second hand at each of the 500 radii and then ploted to another second
+// it's own circumference. Time dilation is calculated against the velocity
+// of the second hand at each of the 500 radii and then plotted to another second
 // hand depiction the time dilation.
-// The mathimatical calculations are against the full size clock and are then
+// The mathematical calculations are against the full size clock and are then
 // scaled to fit the 500px radius and 3600 points of circumference. The values
-// are rounded to the neerest pixel (x,y) position.
+// are rounded to the nearest pixel (x,y) position.
 // Due to the size of the numbers involved there is some rounding of the floating
-// point values from the 1:1 scale but is not detectible in this representation.
+// point values from the 1:1 scale but is not detectable in this representation.
 // The final display offers a unique perspective of the maped time dilation over
 // and extended period as this would be more difficult to exemplify in a linear
 // x.y graph. In some sense it offers a 2D perspective plus time.
-// This is a mathimatical representation only and effects from mass are
+// This is a mathematical representation only and effects from mass are
 // disregarded.
 //
 // The clock now follows the computer clock time as well as keeping both
 // second hands in sync. The calculations for the time dilation period is
 // calculated at each update from the computer clock.
 //
-// The x.y plot possitions are calculated from a 500 * 3600 pre-created look up
+// The x.y plot positions are calculated from a 500 * 3600 pre-created look up
 // table. Each period of dilation is calculated for the current clock time for
 // the 500 positions of radius against the time when the clock app started.
 //
 // Although some amount of accumulated error occurs over time due to the size
-// limitations of the floating point presission I don't think this would be
+// limitations of the floating point precision I don't think this would be
 // recognisable at the scale of the clock with a 1000 pixel diameter.
 //
-// The clock is calculated to a presision of 60 frames per second. In practice
+// The clock is calculated to a precision of 60 frames per second. In practice
 // the clock may update at a faster or slower FPS, but overall accuracy remains.
 // 3600 points are calculated for the circumference of the clock or 60 seconds
-// muliplied by 60 updates per second.
+// multiplied by 60 updates per second.
 //
 // Some of the calculations can be improved to provide greater accuracy as well
-// as be more eficient in CPU cycles, so much can be improved.
+// as be more efficient in CPU cycles, so much can be improved.
 //
 // In time I may include additional physics calculations such as centripetal
-// force, acceleration and gravity. This is purely a mathimatical representation
+// force, acceleration and gravity. This is purely a mathematical representation
 // and the mass of the second hand is not currently taken into account. In a
 // real world (physical structure) the forces applied to the second hand would
 // tear it away from its central axis long before reaching the speed of light.
 //
-// The SDL_Bgi library is quite limited, so in all likelyhood I will migrate
-// the Time Dilation Clock to a more capable grapghics library in the future.
+// The SDL_Bgi library is quite limited, so in all likelihood I will migrate
+// the Time Dilation Clock to a more capable graphics library in the future.
 //------------------------------------------------------------------------------
 // Speed of Light 'c' 299,792,458m/s
 // The above is also called the speed of electromagnetic radiation.
@@ -77,6 +78,7 @@
 #include <stdio.h>
 //#include <conio.h>
 //#include <string.h>
+//#define _USE_MATH_DEFINES
 #include <math.h>
 #include <time.h>
 #include <sys/time.h>
@@ -96,7 +98,7 @@
 // To add or remove the numerals from the clock face.
 #define CLOCK_NUMERALS 0 // 1 == ON | 0 == OFF
 
-// Sepeperate implimentations of the x. y rendering functions.
+// Separate implementations of the x. y rendering functions.
 // I have left both sets so you can see what I have done to
 // calculate 3600 second hand tics per minute :)
 // 3600 (/60 sec) == 60 frames per second for rendering the second hand.
@@ -128,11 +130,11 @@ int main(int argc, char *argv[])
     unused(argc);  // Turns off the compiler warning for unused argc, argv
     unused(argv);  // Turns off the compiler warning for unused argc, argv
 
-// Note: to show greater presision in printf() use %.*f or %.17f
-// Also note that double can store aprox 15 to 17 digets after the period but
-// this can be platform and implimentation dependent.
+// Note: to show greater precision in printf() use %.*f or %.17f
+// Also note that double can store aprox 15 to 17 digits after the period but
+// this can be platform and implementation dependent.
 // The following appears to be incorrect as a 64-bit type should only hold 20
-// digets in total, but DBL_MAX is defibed as 1.7976931348623157E+308 in some
+// digits in total, but DBL_MAX is defined as 1.7976931348623157E+308 in some
 // instances. This differentiation is when it is held as and exponent as seen below.
 //printf("DBL_MAX=%f\n", DBL_MAX);  // (double)DBL_MAX
 //DBL_MAX=179769313486231570000000000000000000000000000000000000000000000000000000 _
@@ -165,7 +167,7 @@ int main(int argc, char *argv[])
     char str[256];
 
     // Creat the look up tables for 500 * 3600 x.y plots.
-    // malloced array dimensions must be freeed using the loop below.
+    // malloced array dimensions must be freed using the loop below.
     //int td_plotx[500][3600], td_ploty[500][3600];
     // approx 13.73291015625 MiB (x 2)
     int q = 3600;  // Circumference plots.
@@ -188,14 +190,14 @@ int main(int argc, char *argv[])
 
     // This hold the accumulation of time up to current time for calculating the
     // time dilation for the second seconds hand.
-    // Some care meeds to be taken with the accumulated size of the values of
-    // the array as they will continue to increas over time until the recorded
+    // Some care needs to be taken with the accumulated size of the values of
+    // the array as they will continue to increase over time until the recorded
     // values exceed the size of double.
-    // I have placed size limit test in the main routibe for this.
+    // I have placed size limit test in the main routine for this.
     double time_accumulative = 0;
-    // Calculates the current acumulation of the 3600 tick period (minutes).
+    // Calculates the current accumulation of the 3600 tick period (minutes).
     int time_accumulative_temp = 0;
-    // Hold the current 3600 (Minute) adjustment amount (incimentes by 3600 per minute).
+    // Hold the current 3600 (Minute) adjustment amount (incitements by 3600 per minute).
     int adjust3600 = 0;
     int cnt2 = 0;  // Loop counter
 
@@ -232,7 +234,7 @@ int main(int argc, char *argv[])
     midx = getmaxx() / 2;
     midy = getmaxy() / 2;
     radius = midy - 4;  // 500
-    //printf("Raduis = %d\n", radius);  // DEBUG
+    //printf("Radius = %d\n", radius);  // DEBUG
     //int maxx = getmaxx();
     //int maxy = getmaxy();
 
@@ -262,7 +264,7 @@ int main(int argc, char *argv[])
     double Velocity[500];  // m/s / 60 for 500px radius
 
 
-    // This obtains our time dilation acurate to 1 sec as a fraction 1/60th of 1 sec.
+    // This obtains our time dilation accurate to 1 sec as a fraction 1/60th of 1 sec.
     // This can also be represented as a meter per second calculation.
     for ( counter = 0; counter < T_Radius; counter++)
         {
@@ -398,10 +400,10 @@ int main(int argc, char *argv[])
         // Minute counters. Ticks over eack minute.
         if (Last_min != min)
             {
-            // Accumulate each minute (3600 ticks) to calculate plote from current time.
+            // Accumulate each minute (3600 ticks) to calculate plot from current time.
             min3600 += 3600;  // if < INT_MAX
             Last_min = min;  // get current/new minute test.
-            time_elapsed++;  // in minutes for the diplay stats.
+            time_elapsed++;  // in minutes for the display stats.
             }
 
 
@@ -409,7 +411,7 @@ int main(int argc, char *argv[])
         for ( cnt2 = 0; cnt2 < T_Radius; cnt2++)   // + 1 for all results
             {
 
-            // The following gives meters per sec3600 for 1 second. Att 500 * radius units it should equal C (299792458)
+            // The following gives meters per sec3600 for 1 second. At 500 * radius units it should equal C (299792458)
             // C = 299792458
             // circumference = 17987547480m
             // Radius = 2862807095.5421653553357478091848m
@@ -419,7 +421,7 @@ int main(int argc, char *argv[])
             //Velocity[500] is a pre-populated look up table of the velocity for each 1/60th second.
             // I will need to change this to calculate from the real time seconds / 60.
 
-            // 3600th divission up to 3600 seconds as
+            // 3600th division up to 3600 seconds as
             //printf("sec3600=%d\n", sec3600);
             // time_accumulative is now real clock time. Gets current time.
             time_accumulative = ((GetTimeDilation(Velocity[cnt2]) / 60.0 ) * (sec3600 + min3600));
@@ -478,13 +480,13 @@ int main(int argc, char *argv[])
 
 
         // NOTE! SDL_Delay() can interfere with the SDL_Bgi
-        // Sleep() vs deley(): Sleep can sometimes interfere with the graphics
+        // Sleep() vs delay(): Sleep can sometimes interfere with the graphics
         // display and is non standard to graphics.h but has the advantage of
-        // keeping the CPU at an idle state. delay is poratable, but will run
+        // keeping the CPU at an idle state. delay is portable, but will run
         // the CPU core at close to 100% while the application is running.
         // delay wait is part of SDL-BGI
         //delay(wait); // The correct sleep function for bgi.
-        // SDL_Delay() Is the native SDL equivelent to Sleep(), sleep()
+        // SDL_Delay() Is the native SDL equivalent to Sleep(), sleep()
         // This library runs on top of SDL2 so it is OK to use SDL functions
         // "With Care".
         SDL_Delay(1);  // Idle back the CPU usage a bit
@@ -508,8 +510,8 @@ int main(int argc, char *argv[])
     }  // <== END main()
 
 
-// A modification of minSecCalc() to acheive 360 x,y points for the second
-// hand. (seconds * 6) + (millisecons / 166667)
+// A modification of minSecCalc() to achieve 360 x,y points for the second
+// hand. (seconds * 6) + (millisecond / 166667)
 // 50 * 6 + 10 <- as weird as that seams we start at 0 to 359 in the array.
 void Calc3600(int radius, int midx, int midy, int secx[3600], int secy[3600])
     {
@@ -553,9 +555,9 @@ void Calc3600(int radius, int midx, int midy, int secx[3600], int secy[3600])
 
 
 // Dilation Plot version
-// A modification of minSecCalc() to acheive 3600 x,y points for the second
-// hand. (seconds * 60) + (millisecons / 166667)
-// 3600 x,y plots are calculated for aech of the 500 raduis points.
+// A modification of minSecCalc() to achieve 3600 x,y points for the second
+// hand. (seconds * 60) + (millisecond / 166667)
+// 3600 x,y plots are calculated for each of the 500 radius points.
 void Calc3600_td(int radius, int midx, int midy, int **secx, int **secy)
     {
     //int i, j = 0, x, y;
@@ -604,8 +606,8 @@ void Calc3600_td(int radius, int midx, int midy, int **secx, int **secy)
     }
 
 
-// A modification of minSecCalc() to acheive 360 x,y points for the second
-// hand. (seconds * 6) + (millisecons / 166667)
+// A modification of minSecCalc() to achieve 360 x,y points for the second
+// hand. (seconds * 6) + (millisecond / 166667)
 // 50 * 6 + 10 <- as weird as that seams we start at 0 to 359 in the array.
 void Calc360(int radius, int midx, int midy, int secx[360], int secy[360])
     {
@@ -701,7 +703,7 @@ void minSecCalc(int radius, int midx, int midy, int secx[60], int secy[60])
 
 /*
    * find the points at 0, 30, 60,.., 360 degrees
-   * on the given circle.  x value correponds to
+   * on the given circle.  x value corresponds to
    * radius * cos(angle) and y value corresponds
    * to radius * sin(angle).  Numbers in the clock
    * are written using the above manipulated x and
@@ -742,12 +744,12 @@ void calcPoints(int radius, int midx, int midy, int x[12], int y[12])
 
 // Returns seconds per 1 second.
 // per 1 sec in this case also equals velocity as m/s
-// does this aslo equate to a % ? of 1 sec?
+// does this also equate to a % ? of 1 sec?
 double GetTimeDilation(double v)  //double velocity, double distance)
     {
 
     // t'=t/sqrt(1-v^2/C^2)
-    // the t/sqrt is omited as I am using 1 second intervals for all calculations.
+    // the t/sqrt is omitted as I am using 1 second intervals for all calculations.
     //double v = 299792458 * 0.99;// 299792458 * 0.99;  // 100% C m/s
 
     //double distance = 17987547480 / 60.0;  // 1 sec
@@ -756,7 +758,7 @@ double GetTimeDilation(double v)  //double velocity, double distance)
     //double result1, result2, result3,
     double result4;//, result5;
 
-    // The folowing is altered to keep the calculations withing the limits of
+    // The following is altered to keep the calculations withing the limits of
     // double. Both equate to the same values.
     //result4 = sqrt(1 - (v * v) / (C * C));  // stationary observer.
     result4 = sqrt(1 - (v / C) * (v / C));  // stationary observer.
@@ -764,7 +766,7 @@ double GetTimeDilation(double v)  //double velocity, double distance)
     //This moves the time dilation forward rather than behind
     //result5 = 1 / result4;  // The moving object/observer.
 
-    // The result is in meters per second. This means that the reslults
+    // The result is in meters per second. This means that the results
     // can be used as meters per 1 second when converting to a smaller radius.
     return result4;
     }
